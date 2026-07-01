@@ -4,396 +4,487 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Embedded Systems Skill Tree</title>
+    <!-- Use FontAwesome for the icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            /* Hexagon Geometry */
-            --hex-w: 120px;
-            --hex-h: 138.56px; /* Width * 1.1547 (pointy topped hexagon ratio) */
-            --hex-margin: 5px;
-            --hex-overlap: -34px; /* Approx Height * 0.25 to interlock rows */
+            --bg-page: #f5f5f5;
+            --paper: #ffffff;
+            --ink: #000000;
+            --fill-color: #61dafb; /* Bright blue for checked off boxes */
             
-            /* Colors */
-            --bg-paper: #ffffff;
-            --border-ink: #111111;
-            --fill-color: #61dafb; /* A nice bright blue to mimic a highlighter */
-            --text-color: #111111;
+            /* Hexagon Geometry */
+            --hex-w: 130px;
+            --hex-h: 150px; /* Width * 1.1547 for pointy top */
+            --hex-spacing-x: 97.5px; /* Width * 0.75 */
+            --hex-spacing-y: 150px; /* Height */
+            
+            --border-width: 3px;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f0f0; /* Light grey backdrop */
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-page);
             display: flex;
             justify-content: center;
             padding: 20px;
+            overflow-x: hidden;
         }
 
-        .poster-board {
-            background-color: var(--bg-paper);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            padding: 30px 20px;
-            max-width: 1100px;
+        /* Responsive Wrapper */
+        .zoom-wrapper {
             width: 100%;
-            position: relative;
-            border: 2px solid var(--border-ink);
-            overflow: hidden;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 3rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--border-ink);
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            font-size: 1rem;
-            color: #555;
-            font-style: italic;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 0 20px;
-        }
-
-        .score-box {
-            border: 3px solid var(--border-ink);
-            background: var(--border-ink);
-            color: white;
-            padding: 8px 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-
-        .reset-btn {
-            background: white;
-            border: 2px solid var(--border-ink);
-            color: var(--border-ink);
-            padding: 8px 15px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .reset-btn:hover {
-            background: var(--border-ink);
-            color: white;
-        }
-
-        .tree-layout {
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 40px;
-        }
-
-        /* The Basics -> Advanced Progression Arrow */
-        .progression-arrow {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            width: 50px;
-            position: relative;
-            padding: 40px 0;
-        }
-
-        .arrow-head {
-            width: 0; 
-            height: 0; 
-            border-left: 25px solid transparent;
-            border-right: 25px solid transparent;
-            border-bottom: 35px solid var(--border-ink);
-            position: absolute;
-            top: 0;
-        }
-
-        .arrow-shaft {
-            width: 15px;
-            height: 100%;
-            background: linear-gradient(to top, #999, var(--border-ink));
-            position: absolute;
-            top: 35px;
-            bottom: 0;
-            z-index: 0;
-        }
-
-        .arrow-label {
-            z-index: 1;
-            font-weight: 900;
-            font-size: 1.5rem;
-            color: white;
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            text-shadow: 0 0 5px rgba(0,0,0,0.8);
-        }
-
-        .label-adv { margin-top: 60px; }
-        .label-bas { margin-bottom: 20px; }
-
-        .honeycomb-wrapper {
-            /* This wrapper allows responsive scaling down of the fixed grid */
-            width: 100%;
+            max-width: 1400px;
             display: flex;
             justify-content: center;
-            overflow-x: auto;
+            overflow-x: auto; /* Allow horizontal scroll on very small screens */
             padding-bottom: 20px;
         }
 
-        .honeycomb-grid {
+        .poster {
+            background-color: var(--paper);
+            border: 4px solid var(--ink);
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            /* Fixed internal size to ensure perfect geometric rendering */
+            width: 1150px; 
+            min-width: 1150px;
+            transform-origin: top left;
+        }
+
+        /* --- Header Styles --- */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+
+        .header-sub {
+            display: inline-block;
+            background: var(--ink);
+            color: var(--paper);
+            padding: 5px 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .header-desc {
+            font-size: 1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .header-icon-left, .header-icon-right {
+            position: absolute;
+            top: 0;
+            font-size: 5rem;
+            color: var(--ink);
+        }
+        .header-icon-left { left: 20px; }
+        .header-icon-right { right: 20px; }
+
+        /* --- Sidebar Arrow --- */
+        .arrow-container {
+            position: absolute;
+            left: 20px;
+            top: 250px;
+            height: 1250px;
+            width: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Scale down on smaller screens */
-            transform-origin: top center;
         }
 
-        .hex-row {
+        .arrow-head {
+            width: 0; height: 0; 
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 30px solid var(--ink);
+        }
+
+        .arrow-body {
+            width: 20px;
+            flex-grow: 1;
+            background: linear-gradient(to bottom, #000 0%, #ccc 100%);
+            position: relative;
             display: flex;
-            justify-content: center;
-            margin-top: var(--hex-overlap);
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 0;
         }
 
-        .hex-row:first-child {
-            margin-top: 0;
+        .arrow-text {
+            color: white;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
         }
 
-        /* Hexagon Structure - Using clip-path */
+        .arrow-base {
+            width: 0; height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid #ccc;
+        }
+
+        /* --- Hexagon Grid System --- */
+        .grid-container {
+            position: relative;
+            width: 1000px;
+            height: 1550px;
+            margin-left: 80px; /* Room for the arrow */
+        }
+
         .hex-wrap {
+            position: absolute;
             width: var(--hex-w);
             height: var(--hex-h);
-            margin: 0 var(--hex-margin);
             clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            background: var(--border-ink); /* This forms the border */
+            background: var(--ink);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: transform 0.15s ease-out;
-            position: relative;
+            transition: transform 0.1s ease;
         }
 
         .hex-inner {
-            /* Inner hex is slightly smaller to reveal the border */
-            width: calc(var(--hex-w) - 4px);
-            height: calc(var(--hex-h) - 4px);
+            width: calc(var(--hex-w) - (var(--border-width) * 2));
+            height: calc(var(--hex-h) - (var(--border-width) * 2));
             clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            background: var(--bg-paper);
+            background: var(--paper);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 10px 5px;
             text-align: center;
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.2s;
         }
 
-        .hex-content {
-            font-size: 0.75rem;
+        .hex-wrap:hover { transform: scale(1.05); z-index: 10; }
+        .hex-wrap:active { transform: scale(0.95); }
+        .hex-wrap.completed .hex-inner { background: var(--fill-color); }
+
+        .hex-text {
+            font-size: 0.65rem;
             font-weight: 700;
-            line-height: 1.2;
-            color: var(--text-color);
-            pointer-events: none; /* Prevents text selection while clicking */
+            line-height: 1.1;
+            color: var(--ink);
+            pointer-events: none;
+            margin-bottom: 5px;
         }
 
-        @media (hover: hover) {
-            .hex-wrap:hover {
-                transform: scale(1.08);
-                z-index: 10;
-            }
+        .hex-icon {
+            font-size: 1.2rem;
+            color: var(--ink);
+            pointer-events: none;
         }
 
-        .hex-wrap:active {
-            transform: scale(0.95);
+        /* Special Goal Hexes */
+        .hex-goal .hex-inner {
+            border: 2px dashed #999;
+            background: #fafafa;
+        }
+        .hex-goal .hex-text {
+            color: #777;
+            font-style: italic;
         }
 
-        .hex-wrap.completed .hex-inner {
-            background: var(--fill-color);
+        /* --- Footer & Start Marker --- */
+        .start-marker {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+        .start-dash {
+            height: 40px;
+            border-left: 10px dashed var(--ink);
+            margin: 0 15px;
+            transform: skew(-15deg);
         }
 
-        /* Responsive Scaling for the grid to fit on mobile */
-        @media (max-width: 900px) {
-            .honeycomb-grid { transform: scale(0.85); }
-            .progression-arrow { width: 35px; }
-            .arrow-label { font-size: 1.2rem; }
-            .header h1 { font-size: 2rem; }
+        .footer {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-top: 2px solid var(--ink);
+            padding-top: 10px;
         }
 
-        @media (max-width: 700px) {
-            .honeycomb-grid { transform: scale(0.7); }
-            .tree-layout { gap: 5px; }
-            .poster-board { padding: 15px 5px; }
+        .footer-credits {
+            background: var(--ink);
+            color: white;
+            padding: 5px 20px;
+            font-weight: bold;
         }
 
-        @media (max-width: 500px) {
-            .honeycomb-grid { transform: scale(0.55); }
-            .arrow-label { font-size: 1rem; }
-            .controls { flex-direction: column; gap: 15px; }
+        .score-box {
+            border: 4px solid var(--ink);
+            border-radius: 10px;
+            overflow: hidden;
+            text-align: center;
+            width: 200px;
         }
+        .score-header {
+            background: var(--ink);
+            color: white;
+            padding: 5px;
+            font-weight: bold;
+        }
+        .score-val {
+            font-size: 2rem;
+            font-weight: 900;
+            padding: 10px;
+        }
+
+        /* Scale entire board down for smaller screens seamlessly */
+        @media (max-width: 1200px) { .poster { transform: scale(0.85); margin: -5% -7.5%; } }
+        @media (max-width: 900px) { .poster { transform: scale(0.65); margin: -15% -17.5%; } }
+        @media (max-width: 600px) { .poster { transform: scale(0.45); margin: -30% -27.5%; } }
     </style>
 </head>
 <body>
 
-    <div class="poster-board">
-        <div class="header">
-            <h1>Embedded Systems</h1>
-            <p>Skill Tree: Click in the boxes to color your progress</p>
-        </div>
-
-        <div class="controls">
-            <button class="reset-btn" id="resetBtn">Erase Board</button>
-            <div class="score-box">
-                Total Score: <span id="score">0</span> / <span id="total">45</span>
+    <div class="zoom-wrapper">
+        <div class="poster">
+            
+            <div class="header">
+                <i class="fa-solid fa-microchip header-icon-left"></i>
+                <h1>Embedded Systems</h1>
+                <div class="header-sub">Skill Tree: Color in the Boxes</div>
+                <p class="header-desc">Color in the boxes of anything you've already completed, visualize your skills and identify your skill gaps. Get inspired to try new things and tailor the skill tree to suit your own journey by swapping in your own goals.</p>
+                <i class="fa-solid fa-square-poll-vertical header-icon-right"></i>
             </div>
-        </div>
 
-        <div class="tree-layout">
-            <!-- Sidebar Progression Arrow -->
-            <div class="progression-arrow">
+            <div class="arrow-container">
                 <div class="arrow-head"></div>
-                <div class="arrow-shaft"></div>
-                <div class="arrow-label label-adv">Advanced</div>
-                <div class="arrow-label label-bas">Basics</div>
+                <div class="arrow-body">
+                    <span class="arrow-text">ADVANCED</span>
+                    <span class="arrow-text" style="color: #111;">BASICS</span>
+                </div>
+                <div class="arrow-base"></div>
             </div>
 
-            <!-- Hexagon Grid Container -->
-            <div class="honeycomb-wrapper">
-                <div class="honeycomb-grid" id="gridContainer">
-                    <!-- Javascript will inject the hexagon rows here -->
+            <div class="grid-container" id="grid">
+                <!-- Javascript will inject hexagons perfectly positioned -->
+            </div>
+
+            <div class="start-marker">
+                START <div class="start-dash"></div> HERE
+            </div>
+
+            <div class="footer">
+                <div>Name: ______________________</div>
+                <div class="footer-credits">MADE BY embedded.fm AND STEPH PIPER - MAKERQUEEN AU</div>
+                <div class="score-box">
+                    <div class="score-header">Total Score</div>
+                    <div class="score-val"><span id="score">0</span> / <span id="total">0</span></div>
                 </div>
             </div>
+
         </div>
     </div>
 
     <script>
-        
-        // Exact 45 skills mapped to match the original layout request
-        // Ordered from Most Advanced (Top) to Most Basic (Bottom)
-        const flatSkills = [
-            // TOP ROWS (Advanced - 17 total)
-            "Add Machine Learning (ML) to a device", "Create your own custom PCB", "Design a low current circuit", "Write an Arduino Library", 
-            "Create a CI/CD System", "Write a datasheet", "Trace debugging to troubleshoot a problem", "Write manufacturing test software", "Bit bang a communication driver",
-            "Optimize assembly code", "Adapt RTOS to a new board", "Write custom BLE GATT", "Use multiple architectures in a software image",
-            "Debug with a logic analyzer", "Modify a Linker File", "Reverse engineer a communication protocol", "Use Direct Memory Access (DMA)",
+        /*
+          Pointy-Topped Hex Grid Coordinate System.
+          Col = X axis. Row = Y axis.
+          Even columns (0, 2, 4...) are physically shifted DOWN by half a hexagon height.
+          Odd columns (1, 3, 5...) are aligned normally.
+        */
+        const hexMap = [
+            // Column 0 (Even, Shifted Down)
+            { c: 0, r: 1, text: "Trace debugging to troubleshoot a problem", icon: "fa-desktop" },
+            { c: 0, r: 2, text: "Use multiple architectures in a software image", icon: "fa-network-wired" },
+            { c: 0, r: 3, text: "Use an IMU sensor to track motion in multiple axes", icon: "fa-arrows-to-dot" },
+            { c: 0, r: 4, text: "Analyze a signal with Fast Fourier Transform (FFT)", icon: "fa-wave-square" },
+            { c: 0, r: 5, text: "Convert a signal from analog to digital (ADC)", icon: "fa-chart-line" },
             
-            // MIDDLE ROWS (Intermediate - 16 total)
-            "Debug a hard fault on a microcontroller", "Use an IMU sensor", "Debug a project with an oscilloscope", "Set up a cross compiler", 
-            "Bring up a custom board for the first time", "Analyze signal with Fast Fourier Transform", "Update firmware remotely (OTA)", "Use a Real Time Operating System (RTOS)", "Implement an interrupt service routine (ISR)",
-            "Use a step-through debugger", "Understand a circular buffer", "Use Bluetooth Low Energy (BLE)",
-            "Display text on a screen", "Use Pulse Width Modulation (PWM)", "Implement a state machine", "Move a motor",
-            
-            // BOTTOM ROWS (Basics - 12 total)
-            "Send data to the cloud", "Configure a timer", "Convert a signal from analog to digital", "Use SPI to send/receive data", "Use I2C communication",
-            "Use UART serial communication", "Debounce a button",
-            "Use a Hardware Simulator", "Commit to version control", "Solder header pins", "Blink an LED",
-            "Get an Arduino (START)"
+            // Column 1 (Odd)
+            { c: 1, r: 0, text: "Set your own goal!", icon: "", isGoal: true },
+            { c: 1, r: 1, text: "Write a datasheet", icon: "fa-file-lines" },
+            { c: 1, r: 2, text: "Bit bang a communication driver", icon: "fa-exclamation-triangle" },
+            { c: 1, r: 3, text: "Use Direct Memory Access (DMA)", icon: "fa-microchip" },
+            { c: 1, r: 4, text: "Create a circular buffer that uses more than 2 pointers", icon: "fa-circle-notch" },
+            { c: 1, r: 5, text: "Understand how to use a circular buffer", icon: "fa-spinner" },
+
+            // Column 2 (Even, Shifted Down)
+            { c: 2, r: 1, text: "Create a software release process", icon: "fa-cloud-arrow-up" },
+            { c: 2, r: 2, text: "Teach a class on embedded systems", icon: "fa-person-chalkboard" },
+            { c: 2, r: 3, text: "Reverse engineer a communication protocol", icon: "fa-gears" },
+            { c: 2, r: 4, text: "Use a camera in a project", icon: "fa-camera" },
+            { c: 2, r: 5, text: "Configure a timer", icon: "fa-stopwatch" },
+            { c: 2, r: 6, text: "Use I2C communication", icon: "fa-circle-nodes" },
+            { c: 2, r: 7, text: "Use REPL in MicroPython to blink an LED", icon: "fa-python" },
+
+            // Column 3 (Odd)
+            { c: 3, r: 0, text: "Set your own goal!", icon: "", isGoal: true },
+            { c: 3, r: 1, text: "Create a CI/CD System", icon: "fa-rocket" },
+            { c: 3, r: 2, text: "Make a dashboard for monitoring remote units", icon: "fa-chart-pie" },
+            { c: 3, r: 3, text: "Use a .map file to debug a crash", icon: "fa-map" },
+            { c: 3, r: 4, text: "Debug a hard fault on a microcontroller", icon: "fa-bug" },
+            { c: 3, r: 5, text: "Implement MCU sleep in a low power project", icon: "fa-bed" },
+            { c: 3, r: 6, text: "Use a step-through debugger to troubleshoot a problem", icon: "fa-magnifying-glass" },
+            { c: 3, r: 7, text: "Send data to the cloud", icon: "fa-cloud" },
+            { c: 3, r: 8, text: "Use UART serial communication", icon: "fa-arrow-right-arrow-left" },
+            { c: 3, r: 9, text: "Get an Arduino", icon: "fa-wand-magic-sparkles" },
+
+            // Column 4 (Even, Shifted Down)
+            { c: 4, r: 0, text: "Edit binary / hex to fix a problem after release", icon: "fa-pen" },
+            { c: 4, r: 1, text: "Write custom BLE GATT to communicate between devices", icon: "fa-bluetooth-b" },
+            { c: 4, r: 2, text: "Blow fuses to test security in a project", icon: "fa-fire" },
+            { c: 4, r: 3, text: "Update firmware remotely using secure encryption", icon: "fa-lock" },
+            { c: 4, r: 4, text: "Update firmware remotely (OTA, WiFi, BLE)", icon: "fa-wifi" },
+            { c: 4, r: 5, text: "Use Bluetooth Low Energy (BLE) to show a sensor value", icon: "fa-bluetooth" },
+            { c: 4, r: 6, text: "Blink an LED", icon: "fa-lightbulb" },
+
+            // Column 5 (Odd)
+            { c: 5, r: 0, text: "Set your own goal!", icon: "", isGoal: true },
+            { c: 5, r: 1, text: "Write an Arduino Library", icon: "fa-book" },
+            { c: 5, r: 2, text: "Write software for programming and testing many boards", icon: "fa-spider" },
+            { c: 5, r: 3, text: "Adapt RTOS to a new board", icon: "fa-check-to-slot" },
+            { c: 5, r: 4, text: "Run unit tests in an algorithm sandbox", icon: "fa-box-open" },
+            { c: 5, r: 5, text: "Create a custom USB/HID Device", icon: "fa-usb" },
+            { c: 5, r: 6, text: "Use pulse width modulation (PWM) to control RGB LEDs", icon: "fa-rainbow" },
+            { c: 5, r: 7, text: "Use Pulse Width Modulation (PWM)", icon: "fa-signal" },
+            { c: 5, r: 8, text: "Use SPI to send/receive data", icon: "fa-ellipsis-h" },
+
+            // Column 6 (Even, Shifted Down)
+            { c: 6, r: 0, text: "Design a low current circuit to monitor lithium battery usage", icon: "fa-battery-half" },
+            { c: 6, r: 1, text: "Use a multicore processor", icon: "fa-cubes" },
+            { c: 6, r: 2, text: "Modify a Linker File", icon: "fa-link" },
+            { c: 6, r: 3, text: "Bring up a custom board for the first time", icon: "fa-cake-candles" },
+            { c: 6, r: 4, text: "Display text on a screen in a different font", icon: "fa-font" },
+            { c: 6, r: 5, text: "Move a motor", icon: "fa-car-battery" },
+            { c: 6, r: 6, text: "Debounce a button", icon: "fa-hand-pointer" },
+            { c: 6, r: 7, text: "Use a Hardware Simulator (eg. WokWi)", icon: "fa-laptop-code" },
+
+            // Column 7 (Odd)
+            { c: 7, r: 0, text: "Set your own goal!", icon: "", isGoal: true },
+            { c: 7, r: 1, text: "Fix 49-day reboot problem with a calendar", icon: "fa-calendar-days" },
+            { c: 7, r: 2, text: "Optimize assembly code", icon: "fa-code" },
+            { c: 7, r: 3, text: "Write manufacturing test software", icon: "fa-clipboard-check" },
+            { c: 7, r: 4, text: "Set up a cross compiler", icon: "fa-screwdriver-wrench" },
+            { c: 7, r: 5, text: "Use closed loop control (PID) to regulate a project", icon: "fa-arrows-spin" },
+            { c: 7, r: 6, text: "Implement a state machine", icon: "fa-robot" },
+            { c: 7, r: 7, text: "Commit to a version control system (such as Github)", icon: "fa-code-branch" },
+            { c: 7, r: 8, text: "Solder in your own header pins", icon: "fa-plug" },
+
+            // Column 8 (Even, Shifted Down)
+            { c: 8, r: 0, text: "Add Machine Learning (ML) to a device", icon: "fa-brain" },
+            { c: 8, r: 1, text: "Create your own custom PCB", icon: "fa-sim-card" },
+            { c: 8, r: 2, text: "Debug a project with a logic analyzer", icon: "fa-chart-column" },
+            { c: 8, r: 3, text: "Identify a brownout voltage issue", icon: "fa-bolt-lightning" },
+            { c: 8, r: 4, text: "Check a list or .map file to troubleshoot a problem", icon: "fa-list-check" },
+            { c: 8, r: 5, text: "Use a Real Time Operating System (RTOS)", icon: "fa-cube" },
+            { c: 8, r: 6, text: "Implement an interrupt service routine (ISR)", icon: "fa-bolt" },
+            { c: 8, r: 7, text: "Use continuity check on a Multimeter (beepy mode)", icon: "fa-wave-square" },
+
+            // Column 9 (Odd, Rightmost edge)
+            { c: 9, r: 3, text: "Debug a project with an oscilloscope", icon: "fa-signature" },
+            { c: 9, r: 4, text: "Use a mutex to safeguard a resource", icon: "fa-handshake" },
+            { c: 9, r: 5, text: "Erase and rewrite FLASH memory", icon: "fa-memory" }
         ];
 
-        // The exact honeycomb shape alternating row lengths (Total = 45)
-        const rowStructure = [4, 5, 4, 5, 4, 5, 4, 5, 4, 5];
-        
-        const gridContainer = document.getElementById('gridContainer');
+        const grid = document.getElementById('grid');
         const scoreEl = document.getElementById('score');
         const totalEl = document.getElementById('total');
         
-        // Load saved state
-        let progress = JSON.parse(localStorage.getItem('embeddedHexSkills')) || {};
+        let progress = JSON.parse(localStorage.getItem('embeddedSkills_v3')) || {};
         let completedCount = 0;
 
         function updateScore() {
             scoreEl.textContent = completedCount;
         }
 
-        // Handle Click Event
-        function toggleHex(skillId, hexElement) {
-            if (progress[skillId]) {
-                delete progress[skillId];
-                hexElement.classList.remove('completed');
+        function toggleHex(id, el) {
+            if (progress[id]) {
+                delete progress[id];
+                el.classList.remove('completed');
                 completedCount--;
             } else {
-                progress[skillId] = true;
-                hexElement.classList.add('completed');
+                progress[id] = true;
+                el.classList.add('completed');
                 completedCount++;
             }
-            localStorage.setItem('embeddedHexSkills', JSON.stringify(progress));
+            localStorage.setItem('embeddedSkills_v3', JSON.stringify(progress));
             updateScore();
         }
 
-        let skillIndex = 0;
-        totalEl.textContent = flatSkills.length;
+        totalEl.textContent = hexMap.length;
 
-        rowStructure.forEach(rowCount => {
-            // Create a row container
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'hex-row';
+        // Constants from CSS
+        const W = 130;
+        const H = 150;
+        const dX = W * 0.75;
+        const dY = H;
 
-            // Populate row with hexagons
-            for (let i = 0; i < rowCount; i++) {
-                if (skillIndex >= flatSkills.length) break;
-                
-                const skillName = flatSkills[skillIndex];
-                const skillId = skillName.replace(/[^a-zA-Z0-9]/g, ''); 
-                
-                // Create Hex Wrap (Border)
-                const hexWrap = document.createElement('div');
-                hexWrap.className = 'hex-wrap';
-                if (progress[skillId]) {
-                    hexWrap.classList.add('completed');
-                    completedCount++;
-                }
+        hexMap.forEach((item, index) => {
+            const hexWrap = document.createElement('div');
+            hexWrap.className = 'hex-wrap' + (item.isGoal ? ' hex-goal' : '');
+            
+            // X position is straightforward based on column spacing
+            const leftPos = item.c * dX;
+            
+            // Y position incorporates the odd/even row shifting
+            // Even columns (0, 2, 4...) are shifted down by H/2
+            const shiftDown = (item.c % 2 === 0) ? (H / 2) : 0;
+            const topPos = (item.r * dY) + shiftDown;
 
-                // Create Hex Inner (White background)
-                const hexInner = document.createElement('div');
-                hexInner.className = 'hex-inner';
+            hexWrap.style.left = `${leftPos}px`;
+            hexWrap.style.top = `${topPos}px`;
 
-                // Create Text Content
-                const hexContent = document.createElement('span');
-                hexContent.className = 'hex-content';
-                hexContent.textContent = skillName;
+            const id = `hex_${item.c}_${item.r}`;
 
-                // Assemble and attach event
-                hexInner.appendChild(hexContent);
-                hexWrap.appendChild(hexInner);
-                
-                hexWrap.addEventListener('click', () => toggleHex(skillId, hexWrap));
-                
-                rowDiv.appendChild(hexWrap);
-                skillIndex++;
+            if (progress[id]) {
+                hexWrap.classList.add('completed');
+                completedCount++;
             }
-            gridContainer.appendChild(rowDiv);
+
+            const hexInner = document.createElement('div');
+            hexInner.className = 'hex-inner';
+
+            const textEl = document.createElement('div');
+            textEl.className = 'hex-text';
+            textEl.textContent = item.text;
+            hexInner.appendChild(textEl);
+
+            if (item.icon) {
+                const iconEl = document.createElement('i');
+                iconEl.className = `fa-solid ${item.icon} hex-icon`;
+                hexInner.appendChild(iconEl);
+            }
+
+            hexWrap.appendChild(hexInner);
+            hexWrap.addEventListener('click', () => toggleHex(id, hexWrap));
+            grid.appendChild(hexWrap);
         });
 
-        // Initialize score display
         updateScore();
-
-        // Reset functionality
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            if(confirm("Are you sure you want to erase all your progress?")) {
-                progress = {};
-                completedCount = 0;
-                localStorage.removeItem('embeddedHexSkills');
-                document.querySelectorAll('.hex-wrap').forEach(el => el.classList.remove('completed'));
-                updateScore();
-            }
-        });
     </script>
 </body>
 </html>
